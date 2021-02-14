@@ -4,17 +4,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.playgroundapp.domain.entity.Author
+import com.example.playgroundapp.domain.entity.Character
 import com.example.playgroundapp.domain.interactors.AuthorInteractor
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val skeletonInteractor: AuthorInteractor
 ) : ViewModel() {
-    private val mutableItems = MutableLiveData<List<Author>>()
+    private val mutableItems = MutableLiveData<List<Character>>()
     private val mutableLoading = MutableLiveData<Boolean>()
 
-    val items: LiveData<List<Author>> = mutableItems
+    val items: LiveData<List<Character>> = mutableItems
     val loading: LiveData<Boolean> = mutableLoading
 
     init {

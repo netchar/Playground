@@ -1,7 +1,7 @@
 package com.example.playgroundapp
 
 import android.app.Application
-import com.example.playgroundapp.data.remote.api.AuthorApiService
+import com.example.playgroundapp.data.remote.api.CharacterApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,26 +9,28 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class App : Application() {
 
-    lateinit var authorApiService: AuthorApiService
+    lateinit var authorApiService: CharacterApiService
 
     override fun onCreate() {
         super.onCreate()
 
         val provider = ComponentFactory()
         val retrofit = provider.provideRetrofit()
-        authorApiService = retrofit.create(AuthorApiService::class.java)
+        authorApiService = retrofit.create(CharacterApiService::class.java)
     }
 }
 
 class ComponentFactory {
+    companion object {
+        private const val BASE_URL = "https://rickandmortyapi.com/api/"
+    }
 
     fun provideRetrofit(): Retrofit {
         val interceptor = provideLoggingInterceptor()
         val httpClient = provideHttpClient(interceptor)
-
         return Retrofit.Builder()
             .client(httpClient)
-            .baseUrl("https://reqres.in/")
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

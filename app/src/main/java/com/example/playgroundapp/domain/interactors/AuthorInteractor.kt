@@ -1,7 +1,7 @@
 package com.example.playgroundapp.domain.interactors
 
-import com.example.playgroundapp.domain.entity.Author
+import com.example.playgroundapp.domain.entity.Character
 
 interface AuthorInteractor {
-    suspend fun getItems(): List<Author>
+    suspend fun getItems(): List<Character>
 }

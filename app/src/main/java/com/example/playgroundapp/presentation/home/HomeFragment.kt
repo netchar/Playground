@@ -9,10 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.playgroundapp.R
 import com.example.playgroundapp.data.DataMapper
-import com.example.playgroundapp.data.repository.AuthorRepositoryImpl
+import com.example.playgroundapp.data.repository.CharacterRepositoryImpl
 import com.example.playgroundapp.domain.interactors.AuthorInteractorImpl
 import com.example.playgroundapp.App
-import com.example.playgroundapp.data.remote.BaseRemoteDataSource
 import com.example.playgroundapp.data.remote.source.AuthorRemoteDataSourceImpl
 
 class HomeFragment : Fragment(R.layout.fragment_first) {
@@ -25,7 +24,7 @@ class HomeFragment : Fragment(R.layout.fragment_first) {
                 val api = (requireContext().applicationContext as App).authorApiService
                 val mapper = DataMapper()
                 val dataSource = AuthorRemoteDataSourceImpl(api)
-                val repository = AuthorRepositoryImpl(dataSource, mapper)
+                val repository = CharacterRepositoryImpl(dataSource, mapper)
                 val interactor = AuthorInteractorImpl(repository)
                 return HomeViewModel(interactor) as T
             }
@@ -42,6 +41,7 @@ class HomeFragment : Fragment(R.layout.fragment_first) {
 
     private fun setupViews(view: View) {
         val recycler = view.findViewById<RecyclerView>(R.id.home_recycler)
+        recycler.setHasFixedSize(true)
         refreshLayout= view.findViewById<SwipeRefreshLayout>(R.id.home_layout_refresh)
         recycler.adapter = homeAdapter
 
