@@ -2,6 +2,7 @@ package com.example.playgroundapp.presentation.home
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -12,7 +13,7 @@ import com.example.playgroundapp.data.DataMapper
 import com.example.playgroundapp.data.repository.CharacterRepositoryImpl
 import com.example.playgroundapp.domain.interactors.AuthorInteractorImpl
 import com.example.playgroundapp.App
-import com.example.playgroundapp.data.remote.source.AuthorRemoteDataSourceImpl
+import com.example.playgroundapp.data.remote.source.CharacterRemoteDataSourceImpl
 
 class HomeFragment : Fragment(R.layout.fragment_first) {
 
@@ -23,7 +24,7 @@ class HomeFragment : Fragment(R.layout.fragment_first) {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 val api = (requireContext().applicationContext as App).authorApiService
                 val mapper = DataMapper()
-                val dataSource = AuthorRemoteDataSourceImpl(api)
+                val dataSource = CharacterRemoteDataSourceImpl(api)
                 val repository = CharacterRepositoryImpl(dataSource, mapper)
                 val interactor = AuthorInteractorImpl(repository)
                 return HomeViewModel(interactor) as T
@@ -59,6 +60,9 @@ class HomeFragment : Fragment(R.layout.fragment_first) {
         })
         viewModel.loading.observe(viewLifecycleOwner, { isLoading ->
             refreshLayout.isRefreshing = isLoading
+        })
+        viewModel.errorMessage.observe(viewLifecycleOwner, { errorMessage ->
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         })
     }
 }

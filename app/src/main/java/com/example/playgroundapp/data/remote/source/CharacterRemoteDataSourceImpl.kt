@@ -1,15 +1,15 @@
 package com.example.playgroundapp.data.remote.source
 
 import com.example.playgroundapp.data.remote.BaseRemoteDataSource
-import com.example.playgroundapp.data.remote.HttpResult
 import com.example.playgroundapp.data.remote.api.CharacterApiService
 import com.example.playgroundapp.data.remote.dto.CharacterResponseApi
+import com.example.playgroundapp.domain.common.Result
 
-class AuthorRemoteDataSourceImpl(
+class CharacterRemoteDataSourceImpl(
     private val api: CharacterApiService
-) : BaseRemoteDataSource(), AuthorRemoteDataSource {
+) : BaseRemoteDataSource(), CharacterRemoteDataSource {
 
-    override suspend fun getAuthors(): HttpResult<CharacterResponseApi> {
+    override suspend fun getAuthors(): Result<CharacterResponseApi> {
         return call { api.getCharacters() }
     }
 }
