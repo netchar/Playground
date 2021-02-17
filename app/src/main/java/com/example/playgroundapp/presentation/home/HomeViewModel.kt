@@ -24,7 +24,7 @@ class HomeViewModel(
         fetchItems()
     }
 
-    fun fetchItems() {
+    private fun fetchItems() {
         viewModelScope.launch {
             mutableLoading.value = true
             when (val response = skeletonInteractor.getCharacters()) {
