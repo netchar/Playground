@@ -1,10 +1,10 @@
 package com.example.playgroundapp.data
 
+import com.example.playgroundapp.data.cache.dto.CharacterDb
 import com.example.playgroundapp.data.remote.dto.CharacterApi
 import com.example.playgroundapp.domain.entity.Character
 
 class DataMapper {
-    fun map(data: CharacterApi): Character {
-        return Character(data.id, data.name, data.status, data.species, data.type, data.gender, data.image)
-    }
+    fun mapToDomainEntity(data: CharacterDb): Character = Character(data.id, data.name, data.type, data.image)
+    fun mapToDatabaseEntity(data: CharacterApi) : CharacterDb = CharacterDb(data.id, data.name, data.type, data.image)
 }

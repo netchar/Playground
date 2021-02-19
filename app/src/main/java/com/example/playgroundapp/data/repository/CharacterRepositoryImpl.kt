@@ -1,6 +1,9 @@
 package com.example.playgroundapp.data.repository
 
 import com.example.playgroundapp.data.DataMapper
+import com.example.playgroundapp.data.cache.dao.CharactersDao
+import com.example.playgroundapp.data.cache.dto.CharacterDb
+import com.example.playgroundapp.data.remote.dto.CharacterApi
 import com.example.playgroundapp.data.remote.dto.CharacterResponseApi
 import com.example.playgroundapp.data.remote.source.CharacterRemoteDataSource
 import com.example.playgroundapp.domain.CharacterRepository
@@ -11,15 +14,35 @@ import kotlinx.coroutines.withContext
 
 class CharacterRepositoryImpl(
     private val remote: CharacterRemoteDataSource,
+    private val cache: CharactersDao,
     private val mapper: DataMapper
 ) : CharacterRepository {
 
     override suspend fun getCharacters(): Result<List<Character>> {
         return withContext(Dispatchers.IO) {
-            when (val response: Result<CharacterResponseApi> = remote.getAuthors()) {
-                is Result.Success -> Result.Success(response.data.results.map { mapper.map(it) })
-                is Result.Error -> Result.Error(response.error)
+            val databaseEntities = cache.getAll()
+
+            if (isCacheValid(databaseEntities)) {
+                val domainEntities = databaseEntities.map { mapper.mapToDomainEntity(it) }
+                Result.Success(domainEntities)
+            } else {
+                when (val networkResponse: Result<CharacterResponseApi> = remote.getCharacters()) {
+                    is Result.Success -> {
+                        putIntoCache(networkResponse.data.results)
+                        val domainEntities = cache.getAll().map { mapper.mapToDomainEntity(it) }
+                        Result.Success(domainEntities)
+                    }
+                    is Result.Error -> Result.Error(networkResponse.error)
+                }
             }
         }
+    }
+
+    private fun isCacheValid(databaseEntities: List<CharacterDb>) = databaseEntities.isNotEmpty()
+
+    private suspend fun putIntoCache(charactersApi: List<CharacterApi>) {
+        val dbEntities = charactersApi.map { mapper.mapToDatabaseEntity(it) }
+        cache.delete(*dbEntities.toTypedArray())
+        cache.insert(dbEntities)
     }
 }

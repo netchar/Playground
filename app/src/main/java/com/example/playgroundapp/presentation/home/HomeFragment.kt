@@ -11,7 +11,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.playgroundapp.R
 import com.example.playgroundapp.data.DataMapper
 import com.example.playgroundapp.data.repository.CharacterRepositoryImpl
-import com.example.playgroundapp.domain.interactors.AuthorInteractorImpl
+import com.example.playgroundapp.domain.interactors.CharactersInteractorImpl
 import com.example.playgroundapp.App
 import com.example.playgroundapp.data.remote.source.CharacterRemoteDataSourceImpl
 
@@ -22,11 +22,12 @@ class HomeFragment : Fragment(R.layout.fragment_first) {
     private val viewModel by lazy {
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                val api = (requireContext().applicationContext as App).authorApiService
+                val app = requireContext().applicationContext as App
                 val mapper = DataMapper()
-                val dataSource = CharacterRemoteDataSourceImpl(api)
-                val repository = CharacterRepositoryImpl(dataSource, mapper)
-                val interactor = AuthorInteractorImpl(repository)
+                val remoteDataSource = CharacterRemoteDataSourceImpl(app.authorApiService)
+                val cache = app.database.getCharactersDao()
+                val repository = CharacterRepositoryImpl(remoteDataSource, cache, mapper)
+                val interactor = CharactersInteractorImpl(repository)
                 return HomeViewModel(interactor) as T
             }
         }
@@ -43,7 +44,7 @@ class HomeFragment : Fragment(R.layout.fragment_first) {
     private fun setupViews(view: View) {
         val recycler = view.findViewById<RecyclerView>(R.id.home_recycler)
         recycler.setHasFixedSize(true)
-        refreshLayout= view.findViewById<SwipeRefreshLayout>(R.id.home_layout_refresh)
+        refreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.home_layout_refresh)
         recycler.adapter = homeAdapter
 
         refreshLayout.setOnRefreshListener { viewModel.refresh() }

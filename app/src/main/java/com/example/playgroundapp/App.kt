@@ -1,6 +1,9 @@
 package com.example.playgroundapp
 
 import android.app.Application
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.playgroundapp.data.cache.AppDatabase
 import com.example.playgroundapp.data.remote.api.CharacterApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,8 +11,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class App : Application() {
-
     lateinit var authorApiService: CharacterApiService
+    lateinit var database: AppDatabase
 
     override fun onCreate() {
         super.onCreate()
@@ -17,6 +20,7 @@ class App : Application() {
         val provider = ComponentFactory()
         val retrofit = provider.provideRetrofit()
         authorApiService = retrofit.create(CharacterApiService::class.java)
+        database = provider.provideDatabase(this)
     }
 }
 
@@ -44,6 +48,11 @@ class ComponentFactory {
     private fun provideHttpClient(interceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(interceptor)
+            .build()
+    }
+
+    fun provideDatabase(applicationContext: Application): AppDatabase {
+        return Room.databaseBuilder(applicationContext, AppDatabase::class.java, "playground_database")
             .build()
     }
 }

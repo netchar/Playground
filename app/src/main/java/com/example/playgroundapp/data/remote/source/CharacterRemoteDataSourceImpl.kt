@@ -9,7 +9,7 @@ class CharacterRemoteDataSourceImpl(
     private val api: CharacterApiService
 ) : BaseRemoteDataSource(), CharacterRemoteDataSource {
 
-    override suspend fun getAuthors(): Result<CharacterResponseApi> {
+    override suspend fun getCharacters(): Result<CharacterResponseApi> {
         return call { api.getCharacters() }
     }
 }

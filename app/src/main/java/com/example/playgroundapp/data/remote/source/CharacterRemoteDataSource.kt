@@ -4,5 +4,5 @@ import com.example.playgroundapp.data.remote.dto.CharacterResponseApi
 import com.example.playgroundapp.domain.common.Result
 
 interface CharacterRemoteDataSource {
-    suspend fun getAuthors(): Result<CharacterResponseApi>
+    suspend fun getCharacters(): Result<CharacterResponseApi>
 }
