@@ -1,6 +1,8 @@
 package com.example.playgroundapp.data.repository
 
 import com.example.playgroundapp.data.DataMapper
+import com.example.playgroundapp.data.NetworkBoundResource
+import com.example.playgroundapp.data.Resource
 import com.example.playgroundapp.data.cache.dao.CharactersDao
 import com.example.playgroundapp.data.cache.dto.CharacterDb
 import com.example.playgroundapp.data.remote.dto.CharacterApi
@@ -10,6 +12,8 @@ import com.example.playgroundapp.domain.CharacterRepository
 import com.example.playgroundapp.domain.common.Result
 import com.example.playgroundapp.domain.entity.Character
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class CharacterRepositoryImpl(
@@ -18,7 +22,30 @@ class CharacterRepositoryImpl(
     private val mapper: DataMapper
 ) : CharacterRepository {
 
-    override suspend fun getCharacters(): Result<List<Character>> {
+    override fun getCharacters(): Flow<Resource<List<Character>>> {
+        return object : NetworkBoundResource<List<Character>, CharacterResponseApi>() {
+            override fun fetchFromDatabase(): Flow<List<Character>> {
+                val dbRecords: Flow<List<CharacterDb>> = cache.getAllFlowable()
+                return dbRecords.map { value: List<CharacterDb> -> value.map { mapper.mapToDomainEntity(it) } }
+            }
+
+            override fun shouldFetchRemoteData(data: List<Character>?): Boolean {
+                return true
+            }
+
+            override suspend fun fetchFromRemote(): Result<CharacterResponseApi> {
+                return remote.getCharacters()
+            }
+
+            override suspend fun saveRemoteResults(data: CharacterResponseApi) {
+                val dbEntities = data.results.map { mapper.mapToDatabaseEntity(it) }
+                cache.delete(*dbEntities.toTypedArray())
+                cache.insert(dbEntities)
+            }
+        }.asFlow()
+    }
+
+    override suspend fun getCharactersNow(): Result<List<Character>> {
         return withContext(Dispatchers.IO) {
             val databaseEntities = cache.getAll()
 

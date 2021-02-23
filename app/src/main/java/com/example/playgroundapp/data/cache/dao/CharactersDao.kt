@@ -2,6 +2,7 @@ package com.example.playgroundapp.data.cache.dao
 
 import androidx.room.*
 import com.example.playgroundapp.data.cache.dto.CharacterDb
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CharactersDao {
@@ -13,6 +14,9 @@ interface CharactersDao {
 
     @Query("SELECT * FROM characters")
     suspend fun getAll(): List<CharacterDb>
+
+    @Query("SELECT * FROM characters")
+    fun getAllFlowable(): Flow<List<CharacterDb>>
 
     @Query("SELECT * FROM characters WHERE characters.id = :characterId")
     suspend fun get(characterId: Int): CharacterDb
