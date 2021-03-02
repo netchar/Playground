@@ -3,8 +3,8 @@ package com.example.playgroundapp.data.repository
 import com.example.playgroundapp.data.DataMapper
 import com.example.playgroundapp.data.NetworkBoundResource
 import com.example.playgroundapp.data.Resource
-import com.example.playgroundapp.data.cache.dao.CharactersDao
 import com.example.playgroundapp.data.cache.dto.CharacterDb
+import com.example.playgroundapp.data.cache.source.CharacterLocalDataSource
 import com.example.playgroundapp.data.remote.dto.CharacterApi
 import com.example.playgroundapp.data.remote.dto.CharacterResponseApi
 import com.example.playgroundapp.data.remote.source.CharacterRemoteDataSource
@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class CharacterRepositoryImpl(
-    private val remote: CharacterRemoteDataSource,
-    private val cache: CharactersDao,
-    private val mapper: DataMapper
+        private val remote: CharacterRemoteDataSource,
+        private val cache: CharacterLocalDataSource,
+        private val mapper: DataMapper
 ) : CharacterRepository {
 
     override fun getCharacters(): Flow<Resource<List<Character>>> {

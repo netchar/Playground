@@ -5,8 +5,9 @@ import com.example.playgroundapp.domain.CharacterRepository
 import com.example.playgroundapp.domain.common.Result
 import com.example.playgroundapp.domain.entity.Character
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class CharactersInteractorImpl(
+class CharactersInteractorImpl @Inject constructor(
     private val repository: CharacterRepository
 ) : CharacterInteractor {
 

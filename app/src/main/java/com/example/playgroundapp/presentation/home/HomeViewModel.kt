@@ -10,8 +10,9 @@ import com.example.playgroundapp.domain.entity.Character
 import com.example.playgroundapp.domain.interactors.CharacterInteractor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel(
+class HomeViewModel @Inject constructor(
     private val characterInteractor: CharacterInteractor
 ) : ViewModel() {
     private val mutableErrorMessage = MutableLiveData<String>()

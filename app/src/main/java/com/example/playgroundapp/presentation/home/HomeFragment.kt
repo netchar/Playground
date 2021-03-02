@@ -3,35 +3,23 @@ package com.example.playgroundapp.presentation.home
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.playgroundapp.R
-import com.example.playgroundapp.data.DataMapper
-import com.example.playgroundapp.data.repository.CharacterRepositoryImpl
-import com.example.playgroundapp.domain.interactors.CharactersInteractorImpl
-import com.example.playgroundapp.App
-import com.example.playgroundapp.data.remote.source.CharacterRemoteDataSourceImpl
+import com.example.playgroundapp.presentation.di.helpers.ViewModelFactory
+import dagger.android.support.DaggerFragment
+import javax.inject.Inject
 
-class HomeFragment : Fragment(R.layout.fragment_first) {
+class HomeFragment : DaggerFragment(R.layout.fragment_first) {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
 
     private lateinit var refreshLayout: SwipeRefreshLayout
 
     private val viewModel by lazy {
-        val factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                val app = requireContext().applicationContext as App
-                val mapper = DataMapper()
-                val remoteDataSource = CharacterRemoteDataSourceImpl(app.authorApiService)
-                val cache = app.database.getCharactersDao()
-                val repository = CharacterRepositoryImpl(remoteDataSource, cache, mapper)
-                val interactor = CharactersInteractorImpl(repository)
-                return HomeViewModel(interactor) as T
-            }
-        }
-        ViewModelProvider(this, factory).get(HomeViewModel::class.java)
+        ViewModelProvider(this, viewModelFactory).get(HomeViewModel::class.java)
     }
 
     private val homeAdapter = HomeAdapter()
