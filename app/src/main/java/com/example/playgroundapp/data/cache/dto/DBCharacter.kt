@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 @Entity(tableName = "characters")
-data class CharacterDb(
+data class DBCharacter(
     @PrimaryKey
     val id: Int,
     val name: String,

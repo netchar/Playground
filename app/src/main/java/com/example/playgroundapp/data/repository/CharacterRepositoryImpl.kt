@@ -3,10 +3,10 @@ package com.example.playgroundapp.data.repository
 import com.example.playgroundapp.data.DataMapper
 import com.example.playgroundapp.data.NetworkBoundResource
 import com.example.playgroundapp.data.Resource
-import com.example.playgroundapp.data.cache.dto.CharacterDb
+import com.example.playgroundapp.data.cache.dto.DBCharacter
 import com.example.playgroundapp.data.cache.source.CharacterLocalDataSource
-import com.example.playgroundapp.data.remote.dto.CharacterApi
-import com.example.playgroundapp.data.remote.dto.CharacterResponseApi
+import com.example.playgroundapp.data.remote.dto.ApiCharacter
+import com.example.playgroundapp.data.remote.dto.ApiCharacterResponse
 import com.example.playgroundapp.data.remote.source.CharacterRemoteDataSource
 import com.example.playgroundapp.domain.CharacterRepository
 import com.example.playgroundapp.domain.common.Result
@@ -23,21 +23,21 @@ class CharacterRepositoryImpl(
 ) : CharacterRepository {
 
     override fun getCharacters(): Flow<Resource<List<Character>>> {
-        return object : NetworkBoundResource<List<Character>, CharacterResponseApi>() {
+        return object : NetworkBoundResource<List<Character>, ApiCharacterResponse>() {
             override fun fetchFromDatabase(): Flow<List<Character>> {
-                val dbRecords: Flow<List<CharacterDb>> = cache.getAllFlowable()
-                return dbRecords.map { value: List<CharacterDb> -> value.map { mapper.mapToDomainEntity(it) } }
+                val recordsDB: Flow<List<DBCharacter>> = cache.getAllFlowable()
+                return recordsDB.map { value: List<DBCharacter> -> value.map { mapper.mapToDomainEntity(it) } }
             }
 
             override fun shouldFetchRemoteData(data: List<Character>?): Boolean {
                 return true
             }
 
-            override suspend fun fetchFromRemote(): Result<CharacterResponseApi> {
+            override suspend fun fetchFromRemote(): Result<ApiCharacterResponse> {
                 return remote.getCharacters()
             }
 
-            override suspend fun saveRemoteResults(data: CharacterResponseApi) {
+            override suspend fun saveRemoteResults(data: ApiCharacterResponse) {
                 val dbEntities = data.results.map { mapper.mapToDatabaseEntity(it) }
                 cache.delete(*dbEntities.toTypedArray())
                 cache.insert(dbEntities)
@@ -53,7 +53,7 @@ class CharacterRepositoryImpl(
                 val domainEntities = databaseEntities.map { mapper.mapToDomainEntity(it) }
                 Result.Success(domainEntities)
             } else {
-                when (val networkResponse: Result<CharacterResponseApi> = remote.getCharacters()) {
+                when (val networkResponse: Result<ApiCharacterResponse> = remote.getCharacters()) {
                     is Result.Success -> {
                         putIntoCache(networkResponse.data.results)
                         val domainEntities = cache.getAll().map { mapper.mapToDomainEntity(it) }
@@ -65,9 +65,9 @@ class CharacterRepositoryImpl(
         }
     }
 
-    private fun isCacheValid(databaseEntities: List<CharacterDb>) = databaseEntities.isNotEmpty()
+    private fun isCacheValid(databaseEntities: List<DBCharacter>) = databaseEntities.isNotEmpty()
 
-    private suspend fun putIntoCache(charactersApi: List<CharacterApi>) {
+    private suspend fun putIntoCache(charactersApi: List<ApiCharacter>) {
         val dbEntities = charactersApi.map { mapper.mapToDatabaseEntity(it) }
         cache.delete(*dbEntities.toTypedArray())
         cache.insert(dbEntities)
